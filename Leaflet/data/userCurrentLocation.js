@@ -1,0 +1,1 @@
+var userLocation = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[21.731590032577515,38.24509196144195]}}]}

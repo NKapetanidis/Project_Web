@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Tutorial</title>
+    <! -- leaflet css -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
+ <style>
+     #map {
+         width: 100%;
+         height: 100vh;
+     }
+
+/*       .coordinate {
+        position: absolute;
+        bottom: 10px;
+        right: 50%;
+     }
+*/ 
+     .leaflet-popup-content-wrapper{
+        background-color: #000000;
+        color: #fff;
+        border: 2px solid red;
+     }
+
+     .leaflet-popup-tip{
+        background-color: #000000;      
+     }
+ </style>  
+
+</head>
+<body>
+    <div id="map"></div>
+        <div class="leaflet-control coordinate"></div>
+</body>
+</html>
+
+<! -- leaflet js -->
+<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+<script src="./data/randomMarkers.js"></script> 
+<script> 
+
+// map initialization
+//var map = L.map('map').setView(jsonUserCurrentLocation.features.coordinates, 32);
+var map = L.map('map').setView([38.24509196144195, 21.731590032577515], 32);
+
+//open street map layer
+var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+//osm.addTo(map)
+
+//icon
+var greenIcon = L.icon({
+    iconUrl: 'leaf-green.png',
+    shadowUrl: 'leaf-shadow.png',
+
+    iconSize:     [38, 95], // size of the icon
+    shadowSize:   [50, 64], // size of the shadow
+    iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+    shadowAnchor: [4, 62],  // the same for the shadow
+    popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+});
+
+//marker
+var singleMarker = L.marker([51.5, -0.09], {icon: greenIcon});
+    //popup
+    singleMarker.bindPopup('A pretty CSS3 popup.<br> Easily customizable.');
+ //   singleMarker.addTo(map);
+var littleton = L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.');
+var denver    = L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.');
+var aurora    = L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.');
+var golden    = L.marker([39.77, -105.23]).bindPopup('This is Golden, CO.');
+
+//groupMarkers
+var USAcities = L.layerGroup([littleton, denver, aurora, golden]);
+USAcities.addTo(map);
+
+// extra map layer
+var Esri_NatGeoWorldMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
+	maxZoom: 16
+});
+//Esri_NatGeoWorldMap.addTo(map);
+
+// google maps layer 
+googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+googleStreets.addTo(map);
+
+
+
+//send coordinates to console
+console.log(singleMarker.toGeoJSON());
+
+//JSON Markers
+
+var jsonPointMarkers = L.geoJSON(jsonMarkers, {
+    onEachFeature: function (feature, layer) {   
+        layer.bindPopup('<b>Name: <b>' + feature.properties.name) //function for each marker in JSON file
+    }
+});
+
+var jsonUserCurrentLocation = L.geoJSON(userLocation);
+//, {
+//    onEachFeature: function (layer) {   
+//        layer.bindPopup('<b>You are here<b>') //function for user Location
+//    }
+//});
+
+//base layer control options
+var baseMaps = {
+    "Google Maps": googleStreets,
+    "OpenStreetMap": osm,
+    "National Geographic Maps" : Esri_NatGeoWorldMap
+};
+
+//secondary layer control options
+var overlayMaps = {
+    "Markers from JSON/Points of Interests": jsonPointMarkers,
+    "USA Cities": USAcities,
+    "England Marker": singleMarker
+};
+
+//layer control
+var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+//leaflet events
+//map.on('mousemove', function(){
+//    console.log("your mouse is over the map")
+//})
+
+//map.on('mousemove', function(e){
+//    document.getElementsByClassName('coordinate')[0].innerHTML = 'lat: ' +e.latlng.lat, 'lng: ' + e.latlng.lng; 
+ //   console.log('lat: ' +e.latlng.lat, 'lng: ' + e.latlng.lng)
+//})
+</script>

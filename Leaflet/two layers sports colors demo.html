@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>GeoJSON Example</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+ <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+	
+<style>
+#mapdiv {
+	width: 800px;
+	height: 600px;
+}
+
+</style>
+</head>
+<body>
+	<div id="mapdiv">  </div>
+<script>
+
+var url1 = 'baseball.json';  
+var url2 = 'football.json';  
+
+	var map = L.map('mapdiv').setView([39.0, -98.26], 4); 
+
+	var osm = new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',{ 
+				attribution: 'Â© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+	
+	// Set function for color ramp
+	function getColor(league){
+		return league == 'NL' ? 'blue' :
+			   league == 'AL' ? 'red' :
+								'white';
+	       }	
+	
+	// Set style function that sets fill color property
+	function style(feature) {
+		return {
+			fillColor: setColor(feature.properties.League),
+			fillOpacity: 0.5,
+			weight: 2,
+			opacity: 1,
+			color: '#ffffff',
+			dashArray: '3'
+		};
+	}
+		
+// layer 1
+
+  
+     var bbTeam = L.geoJson(null, {
+			
+            pointToLayer: function(feature, latlng) {
+		
+				return L.circleMarker(latlng, {
+				radius:6,
+				opacity: .5,
+				//color: "#000",
+				color:getColor(feature.properties.League),
+				fillColor:  getColor(feature.properties.League),
+				fillOpacity: 0.8
+
+				});  //.bindTooltip(feature.properties.Name);
+            },
+			
+				onEachFeature: function (feature, layer) {
+					layer._leaflet_id = feature.properties.Team;
+
+				
+					var popupContent = "<p>The <b>" +
+					feature.properties.Team + "</b> play here,</br> They are in the " +
+					feature.properties.League + "</br>" +
+					'<a href="'+ feature.properties.Website +'" target="_blank">Website</a></p>' ;
+							
+					if (feature.properties && feature.properties.popupContent) {
+						popupContent += feature.properties.popupContent;
+					}
+						layer.bindPopup(popupContent);
+
+				}
+				
+				});
+   
+	
+	$.getJSON(url1, function(data) {			
+		bbTeam.addData(data).addTo(map);
+	});	
+//END Layer1
+
+/// Layer 2
+		function getColor2(league){
+		return league == 'NFC' ? 'green' :
+			   league == 'AFC' ? 'orange' :
+								'white';
+	       }	
+	
+	// Set style function that sets fill color property
+	function style2(feature) {
+		return {
+			fillColor: setColor(feature.properties.League),
+			fillOpacity: 0.5,
+			weight: 2,
+			opacity: 1,
+			color: '#ffffff',
+			dashArray: '3'
+		};
+	}	
+
+  //layer2
+       var fbTeam = L.geoJson(null, {
+			
+            pointToLayer: function(feature, latlng) {
+		
+				return L.circleMarker(latlng, {
+				radius:6,
+				opacity: .5,
+				//color: "#000",
+				color:getColor2(feature.properties.League),
+				fillColor:  getColor2(feature.properties.League),
+				fillOpacity: 0.8
+
+				});  //.bindTooltip(feature.properties.Name);
+            },
+			
+			onEachFeature: function (feature, layer) {
+				layer._leaflet_id = feature.properties.Team;
+
+			
+				var popupContent = "<p>The <b>" +
+				feature.properties.Team + "</b> play here,</br> They are in the " +
+				feature.properties.League + "</br>" +
+				'<a href="'+ feature.properties.Website +'" target="_blank">Website</a></p>' ;
+						
+				if (feature.properties && feature.properties.popupContent) {
+					popupContent += feature.properties.popupContent;
+				}
+					layer.bindPopup(popupContent);
+			
+
+			}
+		});
+		
+	$.getJSON(url2, function(data2) {			
+		fbTeam.addData(data2);
+	});		
+	
+//layer 2		
+
+/////////////////////Layer Control  /////////////////////////////////////////////////
+	
+            var baseMaps = {
+                'Open StreetMap': osm
+            };
+
+            var overlayMaps = {
+			'Baseball': bbTeam,
+             'Football"': fbTeam
+            };
+
+		L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+ </script>
+
+</body>
+</html>
